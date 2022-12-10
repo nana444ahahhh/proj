@@ -349,7 +349,7 @@ class focuss(QWidget):
             self.bt.clicked.connect(self.joke)
 
         else:
-            self.bt.clicked.connect(self.bad)
+            self.bt.clicked.connect(self.surrender)
         self.b2.hide()
         self.bt.show()
 
