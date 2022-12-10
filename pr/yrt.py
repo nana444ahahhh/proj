@@ -3,10 +3,9 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel
 from PyQt5.QtGui import QPixmap, QPalette
 from PyQt5.QtCore import Qt
-
-l = [[100, "меч"], [100, "сильный меч"]]
 import sqlite3
 
+l = [[100, "меч"], [100, "сильный меч"]]
 con = sqlite3.connect("shop.sqlite3")
 cur = con.cursor()
 cur.execute(f"""DROP TABLE IF EXISTS shoap;""")
