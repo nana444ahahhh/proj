@@ -19,6 +19,7 @@ class focuss(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.setWindowTitle('Текстовый Квест')
 
     def initUI(self):
         self.p2 = False
