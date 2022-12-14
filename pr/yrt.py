@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel
 from PyQt5.QtGui import QPixmap, QPalette
 from PyQt5.QtCore import Qt
 import sqlite3
+import pygame
 
 l = [[100, "меч"], [100, "сильный меч"]]
 con = sqlite3.connect("shop.sqlite3")
@@ -21,61 +22,93 @@ class focuss(QWidget):
         self.setWindowTitle('Текстовый Квест')
 
     def initUI(self):
-        self.p2 = False
-        self.p = 0
-        self.c1 = 0
-        self.hp = 3
+        self.cp = QLabel("есть 2 чекпоинта: корридор и монстр", self)
+        self.cp.move(0, 0)
+
+        pygame.mixer.init()
+        pygame.mixer.music.load("wise-mystical-tree-music-By-Tuna (1).mp3")
+        pygame.mixer.music.play()
         self.setGeometry(100, 200, 500, 500)
-        self.pixmap = QPixmap('jail.jpeg')
+        self.pixmap = QPixmap('cover1.jpg')
         self.image = QLabel(self)
         self.image.resize(700, 700)
         self.image.setPixmap(self.pixmap)
-        self.t = "Вы очнулись на грязном полу в темнице." + "\n" + "Вас кажется заточил сюда темный повелитель"
-        palette = QPalette()
-        palette.setColor(QPalette.Background, Qt.black)
-        self.setPalette(palette)
+        self.image.move(0, -100)
+
+        self.bt = QPushButton("новая игра", self)
+        self.bt.resize(200, 50)
+        self.bt.move(60, 350)
+        self.et = ""
+        self.b3 = QPushButton("продолжить", self)
+        self.b2 = QPushButton("продолжить", self)
+        self.b2.resize(200, 50)
+        self.b3.resize(200, 50)
+        self.b2.move(60, 400)
+        self.b3.move(60, 400)
+        self.b2.hide()
+        f = open("klad.txt", mode="rt", encoding="utf-8")
+        lines = f.readlines()
+        if lines[0].strip("\n") == "door":
+            self.b3.clicked.connect(self.door)
+        elif lines[0].strip("\n") == "mmm":
+            self.b3.clicked.connect(self.mmm_cp)
+
+        self.bt.clicked.connect(self.begining)
         self.b = QLabel(self)
-        self.b.setText(self.t)
-        self.b.setStyleSheet('color: rgb(255, 255, 255);')
-        self.b.move(30, 450)
-        self.m = 0
         self.coins = QLabel(self)
         self.lives = QLabel(self)
-        self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
-        self.lives.setText(f'''<font color="red">жизни:{self.hp} <Текст</font><br>''')
-        self.lives.move(200, 0)
-
         self.coins.move(0, 0)
         self.weapon = QLabel(self)
         self.weapon.move(300, 0)
+        self.hint = QLabel(self)
+
+        self.hint.move(0, 50)
+        self.p = 0
+        self.c1 = 0
+        self.hp = 3
+        self.m = 0
+        self.h = "нет"
         self.w = "нет"
+        self.b.move(30, 450)
+        self.lives.move(200, 0)
+        palette = QPalette()
+        palette.setColor(QPalette.Background, Qt.black)
+        self.setPalette(palette)
+
+    def begining(self):
+        self.b3.hide()
+        self.pixmap = QPixmap('jail.jpeg')
+        self.image.resize(700, 700)
+        self.image.setPixmap(self.pixmap)
+        self.t = "Вы очнулись на грязном полу в темнице." + "\n" + "Вас кажется заточил сюда темный повелитель"
+
+        self.b.setStyleSheet('color: rgb(255, 255, 255);')
+
+        self.b.setText(self.t)
+        self.b.resize(self.b.sizeHint())
+
+        self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
+        self.lives.setText(f'''<font color="red">жизни:{self.hp} <Текст</font><br>''')
+
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
 
-        self.bt = QPushButton("встать и оглядеться", self)
-        self.bt.resize(200, 50)
-        self.bt.move(60, 350)
-
-        self.b2 = QPushButton(self)
+        self.bt.setText("встать и оглядеться")
         self.b2.resize(200, 50)
         self.b2.move(60, 400)
-        self.b2.hide()
-
-        self.b3 = QPushButton("подождать", self)
-        self.b3.resize(200, 50)
-        self.b3.move(60, 400)
-
+        self.b2.setText("подождать")
         self.bt.clicked.connect(self.key)
-        self.b3.clicked.connect(self.nt)
-        self.hint = QLabel(self)
-        self.h = "нет"
+        self.b2.clicked.connect(self.nt)
+
         self.hint.setText(f'''<font color="red">подсказка:{self.h} <Текст</font><br>''')
-        self.hint.move(0, 50)
+        self.hint.resize(self.hint.sizeHint())
+        self.weapon.resize(self.weapon.sizeHint())
+        self.lives.resize(self.lives.sizeHint())
+        self.coins.resize(self.coins.sizeHint())
 
     def key(self):
         self.pixmap = QPixmap('Без имени-2.jpg')
         self.image.setPixmap(self.pixmap)
         self.image.move(0, -100)
-        self.b3.hide()
         self.b2.show()
         self.b.setText("поздравляю, вы нашли ключ от двери!")
         self.b.setStyleSheet('color: rgb(255, 255,255 );')
@@ -86,8 +119,15 @@ class focuss(QWidget):
         self.b2.show()
 
     def door(self):
+        self.p = 0
+        self.c1 = 0
+        self.hp = 3
+        self.m = 0
+        self.h = "нет"
+
+        with open("klad.txt", "wt", encoding="utf8") as n1:
+            print('door', file=n1, end="\n")
         self.bt.show()
-        self.b2.show()
         self.pixmap = QPixmap('karitar.jpg')
         self.image.move(0, 0)
         self.image.setPixmap(self.pixmap)
@@ -101,20 +141,34 @@ class focuss(QWidget):
         self.b2.clicked.connect(self.ga)
         self.b2.resize(200, 50)
 
+        self.h = "нет"
+        self.hint.setText(f'''<font color="red">подсказка:{self.h} <Текст</font><br>''')
+
+        self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
+        self.lives.setText(f'''<font color="red">жизни:{self.hp} <Текст</font><br>''')
+        self.lives.move(200, 0)
+        self.w = "нет"
+        self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
+        self.hint.resize(self.hint.sizeHint())
+        self.weapon.resize(self.weapon.sizeHint())
+        self.lives.resize(self.lives.sizeHint())
+        self.coins.resize(self.coins.sizeHint())
+        self.b.resize(self.b.sizeHint())
+
     def ga(self):
         self.pixmap = QPixmap('A4.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
         self.b.setText('''<font color="green">вы нашли записку!<Текст</font><br>''')
         self.bt.show()
         self.bt.setText("прочитать")
         self.bt.clicked.connect(self.read)
         self.b2.hide()
+        self.et = "ga"
 
     def read(self):
         self.pixmap = QPixmap('message.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, -5)
+        self.image.move(0, -105)
         self.b.setText('''<font color="green">Вероятно вам её написало мудрое магическое древо<Текст</font><br>''')
         self.bt.show()
         self.bt.setText("продолжить путь ")
@@ -125,7 +179,7 @@ class focuss(QWidget):
     def forest(self):
         self.pixmap = QPixmap('forrest.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.b2.show()
         self.b2.setText("осмотреться")
         self.bt.hide()
@@ -140,13 +194,14 @@ class focuss(QWidget):
         self.b2.hide()
         self.bt.setText("Зайти")
         self.bt.clicked.connect(self.trader)
+        et = "osmotrhouse"
 
     def trader(self):
         self.bt.show()
         self.b2.show()
         self.pixmap = QPixmap('torgash.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.coins.setText(f'''<font color="red">монеты:100 <Текст</font><br>''')
         self.coins.resize(self.coins.sizeHint())
         t2 = "По пути вы нашли 100 монет, в доме был торговец"
@@ -186,7 +241,7 @@ class focuss(QWidget):
     def drevo1(self):
         self.pixmap = QPixmap('drevo.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.b2.show()
         self.b.setText('''<font color="white">Пред вами взошло мудрейшее древо!<Текст</font><br>''')
         self.bt.hide()
@@ -202,6 +257,8 @@ class focuss(QWidget):
         self.bt.hide()
         self.b2.setText("попросить совета")
         self.b2.clicked.connect(self.ussr)
+        with open("klad.txt", "wt", encoding="utf8") as n1:
+            n1.writelines("drevo")
 
     def ussr1(self):
         self.m = 100
@@ -223,6 +280,7 @@ class focuss(QWidget):
         self.b2.clicked.connect(self.mmm)
         self.b2.show()
         self.bt.hide()
+        self.coins.resize(self.coins.sizeHint())
 
     def ussr(self):
 
@@ -240,8 +298,10 @@ class focuss(QWidget):
         self.b2.clicked.connect(self.mmm)
         self.b2.show()
         self.bt.hide()
+        self.coins.resize(self.coins.sizeHint())
 
     def mmm(self):
+
         self.h = "нет"
         self.hint.setText(f'''<font color="red">подсказка:{self.h} <Текст</font><br>''')
         self.hint.resize(self.hint.sizeHint())
@@ -263,6 +323,55 @@ class focuss(QWidget):
             self.b2.setText("ничего не делать")
             self.b2.resize(200, 50)
             self.b2.clicked.connect(self.hitted1)
+        with open("klad.txt", "wt", encoding="utf8") as n1:
+            print('mmm', file=n1, end="\n")
+            print(self.w, file=n1, end="\n")
+            print(self.hp, file=n1, end="\n")
+            print(self.h, file=n1, end="\n")
+            print(self.m, file=n1, end="\n")
+
+    def mmm_cp(self):
+        f = open("klad.txt", mode="rt", encoding="utf-8")
+        self.cp.hide()
+        lines = f.readlines()
+        self.w = lines[1].strip("\n")
+        self.hp = lines[2].strip("\n")
+        self.h = lines[3].strip("\n")
+        self.m = lines[4].strip("\n")
+        self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
+        self.lives.setText(f'''<font color="red">жизни:{self.hp} <Текст</font><br>''')
+        self.hint.setText(f'''<font color="red">подсказка:{self.h} <Текст</font><br>''')
+        self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
+
+        self.coins.resize(self.coins.sizeHint())
+        self.lives.resize(self.lives.sizeHint())
+        self.hint.resize(self.hint.sizeHint())
+        self.weapon.resize(self.weapon.sizeHint())
+        self.pixmap = QPixmap('monitor.jpg')
+        self.image.setPixmap(self.pixmap)
+        self.image.move(0, 0)
+        self.b.setText('''<font color="red">перед вами враждебное существо(1 урон 1 жизнь)<Текст</font><br>''')
+        self.bt.show()
+        self.bt.resize(200, 50)
+        self.b2.show()
+        if self.w != "нет":
+            self.bt.setText("убить(меч сломается)")
+            self.b2.setText("ничего не делать")
+            self.b2.resize(200, 50)
+            self.b2.clicked.connect(self.hitted)
+            self.bt.clicked.connect(self.hit)
+        else:
+            self.bt.hide()
+            self.b2.setText("ничего не делать")
+            self.b2.resize(200, 50)
+            self.b2.clicked.connect(self.hitted1)
+        with open("klad.txt", "wt", encoding="utf8") as n1:
+            print('mmm', file=n1, end="\n")
+            print(self.w, file=n1, end="\n")
+            print(self.hp, file=n1, end="\n")
+            print(self.h, file=n1, end="\n")
+            print(self.m, file=n1, end="\n")
+        self.b.resize(self.b.sizeHint())
 
     def hit(self):
         # вы ударили
@@ -270,7 +379,7 @@ class focuss(QWidget):
         self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
         self.pixmap = QPixmap('Monsters_Werewolf_Blood_Dead_Cadaver_Corpse_524013_2500x1786.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.b.setText("вы убили существо")
         self.w = "нет"
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
@@ -321,7 +430,7 @@ class focuss(QWidget):
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
         self.pixmap = QPixmap('main_trader.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.bt.show()
         self.b2.show()
         self.bt.setText("сильный меч(100)(3 урон)")
@@ -345,15 +454,14 @@ class focuss(QWidget):
         self.b.setText(
             '''<font color="red">вы будете сражаться с повелителем!(2 жизней, 3 урона)<Текст</font><br>''')
         self.bt.setText("сдаться")
-        if self.p2 == True:
-            self.bt.clicked.connect(self.joke)
+        self.b2.hide()
 
-        else:
-            self.bt.clicked.connect(self.surrender)
+        self.bt.clicked.connect(self.surrender)
         self.b2.hide()
         self.bt.show()
 
     def goawaym1(self):
+        print("fs")
         # после бездействия с мечом
         self.m = 0
         self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
@@ -372,25 +480,28 @@ class focuss(QWidget):
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
         self.bt.setText("ударить")
         self.b2.setText("сдаться")
-        if self.p2 == True:
-            self.bt.clicked.connect(self.joke)
-            self.b2.clicked.connect(self.joke)
-        else:
-            self.b2.clicked.connect(self.surrender)
-            self.bt.clicked.connect(self.bad)
+
+        self.b2.clicked.connect(self.surrender)
+        self.bt.clicked.connect(self.bad)
         self.bt.show()
+        self.b2.show()
 
     def bad(self):
+        f = open("klad.txt", mode="rt", encoding="utf-8")
+        lines = f.readlines()
+        lines[0] = ""
         self.pixmap = QPixmap('dead.jpg')
         self.image.setPixmap(self.pixmap)
         self.b.setText(
             '''<font color="white">вы были убиты повелителем<Текст</font><br>''')
         self.bt.hide()
         self.b2.hide()
+        self.image.move(0, -100)
         self.weapon.setText("")
         self.coins.setText("")
         self.hint.setText("")
         self.lives.setText("")
+        self.b.resize(self.b.sizeHint())
 
     def goawaym3(self):
         # после бездействия и покупки
@@ -407,20 +518,21 @@ class focuss(QWidget):
         self.hint.setText(f'''<font color="red">подсказка:{self.h} <Текст</font><br>''')
         self.pixmap = QPixmap('1625629689_5-phonoteka-org-p-mag-art-krasivo-7.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.b.setText(
             '''<font color="red">вы будете сражаться с повелителем!(2 жизней, 3 урона)<Текст</font><br>''')
         self.bt.setText("ударить")
         self.bt.show()
         self.bt.clicked.connect(self.win)
         self.b2.setText("сдаться")
-        if self.p2 == True:
-            self.b2.clicked.connect(self.joke)
-            self.bt.clicked.connect(self.joke)
-        else:
-            self.b2.clicked.connect(self.surrender)
+        self.b2.resize(200, 40)
+
+        self.b2.clicked.connect(self.surrender)
 
     def win(self):
+        f = open("klad.txt", mode="rt", encoding="utf-8")
+        lines = f.readlines()
+        lines[0] = ""
         self.pixmap = QPixmap('duty.jpg')
         self.image.setPixmap(self.pixmap)
         self.b.setText(
@@ -429,8 +541,10 @@ class focuss(QWidget):
         self.b2.hide()
         self.weapon.setText("")
         self.coins.setText("")
+        self.image.move(0, -100)
         self.hint.setText("")
         self.lives.setText("")
+        self.b.resize(self.b.sizeHint())
 
     def goawaym4(self):
 
@@ -451,23 +565,13 @@ class focuss(QWidget):
         self.bt.setText("сдаться")
         self.bt.show()
         self.b2.hide()
-        if self.p2 == True:
-            self.bt.clicked.connect(self.joke)
-        else:
-            self.bt.clicked.connect(self.surrender)
 
-    def joke(self):
-        self.pixmap = QPixmap('medding.jpg')
-        self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
-        self.b.setText('''<font color="white">Повелитель превратился в мясо и вы его съели<Текст</font><br>''')
-        self.bt.hide()
-        self.b2.hide()
-        self.weapon.hide()
-        self.hint.hide()
-        self.coins.hide()
+        self.bt.clicked.connect(self.surrender)
 
     def surrender(self):
+        f = open("klad.txt", mode="rt", encoding="utf-8")
+        lines = f.readlines()
+        lines[0] = ""
         self.pixmap = QPixmap('solod.jpg')
         self.image.setPixmap(self.pixmap)
         self.b.setText(
@@ -477,7 +581,9 @@ class focuss(QWidget):
         self.weapon.setText("")
         self.coins.setText("")
         self.hint.setText("")
+
         self.lives.setText("")
+        self.b.resize(self.b.sizeHint())
 
     def through2(self):
         # после получения удара с мечом
@@ -487,7 +593,7 @@ class focuss(QWidget):
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
         self.pixmap = QPixmap('main_trader.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.bt.show()
         self.b2.show()
 
@@ -511,7 +617,7 @@ class focuss(QWidget):
                where item == "сильный меч"  """).fetchall()
         self.w = list(*self.w)[1]
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
-        self.b.setText('''<font color="green">куплено<Текст</font><br>''')
+        self.b.setText('''<font color="red">куплено<Текст</font><br>''')
         self.m = 0
         self.weapon.resize(self.weapon.sizeHint())
         self.coins.setText(f'''<font color="red">монеты:{self.m} <Текст</font><br>''')
@@ -544,7 +650,7 @@ class focuss(QWidget):
         # после безоружия
         self.pixmap = QPixmap('main_trader.jpg')
         self.image.setPixmap(self.pixmap)
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.b.setText("это какой-то необычный торговец")
         self.bt.show()
         self.b2.show()
@@ -553,6 +659,8 @@ class focuss(QWidget):
         self.b2.setText("уйти(0)")
         self.bt.clicked.connect(self.buy1)
         self.b2.clicked.connect(self.goawaym4)
+        self.lives.setText(f'''<font color="red">жизни:2 <Текст</font><br>''')
+        self.lives.resize(self.lives.sizeHint())
 
     def no_buy(self):
         # невозможность покупки из-за  монет
@@ -577,6 +685,8 @@ class focuss(QWidget):
         self.b2.clicked.connect(self.goawaym1)
 
     def door2(self):
+        self.bt.show()
+        self.b2.show()
         self.pixmap = QPixmap('karitar.jpg')
         self.image.setPixmap(self.pixmap)
         self.image.resize(500, 500)
@@ -589,7 +699,7 @@ class focuss(QWidget):
 
     def osmotr(self):
         self.pixmap = QPixmap('karitar.jpg')
-        self.image.move(0, 0)
+        self.image.move(0, -100)
         self.image.setPixmap(self.pixmap)
         self.b.setText("тут холодно и страшно, кажется лучше не стоять на месте")
         self.b.resize(self.b.sizeHint())
@@ -597,45 +707,35 @@ class focuss(QWidget):
         self.b2.setText("обратно к путешествию")
         self.b2.resize(self.b2.sizeHint())
         self.b2.clicked.connect(self.door2)
+        self.bt.hide()
         self.b2.resize(200, 50)
         self.c1 += 1
 
     def nt(self):
-        if self.p < 10:
-            self.p += 1
-            self.bt.hide()
-            self.b.setText(
-                '''<font color="white">Хммм...Вы так и будете ждать?<Текст</font><br>''')
-            self.b3.setText("Может все-таки начнем наши подвиги?")
-            self.b3.resize(self.b3.sizeHint())
-            self.b3.clicked.connect(self.back)
-        else:
-            self.pixmap = QPixmap('eggas.jpg')
-            self.image.move(0, 0)
-            self.image.setPixmap(self.pixmap)
-            self.image.move(0, -100)
-            self.b.setText('''<font color="red">Пасхалка! Но смысл откроется потом<Текст</font><br>''')
-            self.b3.hide()
-            self.p2 = True
+        self.pixmap = QPixmap('jail.jpeg')
+        self.image.resize(700, 700)
+        self.image.setPixmap(self.pixmap)
+
+        self.bt.hide()
+        self.b.setText(
+            '''<font color="white">Хммм...Вы так и будете ждать?<Текст</font><br>''')
+        self.b2.setText("Может все-таки начнем наши подвиги?")
+        self.b2.resize(self.b2.sizeHint())
+        self.b2.clicked.connect(self.back)
 
     def back(self):
-        if self.p2 != True:
-
-            self.bt.show()
-            self.b3.setText("подождать")
-            self.b3.resize(200, 50)
-            self.b3.clicked.connect(self.nt)
-            self.b.setText(
-                '''<font color="white">Вы ведь собираетесь попытаться выйти отсюда?<Текст</font><br>''')
-        else:
-            self.pixmap = QPixmap('eggas.jpg')
-            self.image.move(0, 0)
-            self.image.setPixmap(self.pixmap)
-            self.image.move(0, -100)
-            self.b.setText('''<font color="red">Пасхалка! Но смысл откроется потом<Текст</font><br>''')
-            self.bt.show()
-            self.b3.hide()
-            self.p2 = True
+        self.pixmap = QPixmap('jail.jpeg')
+        self.image.resize(700, 700)
+        self.image.setPixmap(self.pixmap)
+        self.bt.show()
+        self.b2.setText("подождать")
+        self.b2.show()
+        self.b2.resize(200, 50)
+        self.b2.clicked.connect(self.nt)
+        self.b.setText(
+            '''<font color="white">Вы ведь собираетесь попытаться выйти отсюда?<Текст</font><br>''')
+        self.bt.setText("отправиться дальше")
+        self.bt.clicked.connect(self.key)
 
 
 if __name__ == '__main__':
