@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 import sqlite3
 import pygame
 
-l = [[100, "меч"], [100, "сильный меч"]]
+l = [[100, "меч"], [100, "сильный меч(3)"]]
 con = sqlite3.connect("shop.sqlite3")
 cur = con.cursor()
 cur.execute(f"""DROP TABLE IF EXISTS shoap;""")
@@ -506,7 +506,7 @@ class focuss(QWidget):
     def goawaym3(self):
         # после бездействия и покупки
         self.w = cur.execute("""select * from shoap
-                      where item == "сильный меч"  """).fetchall()
+                      where item == "сильный меч(3)"  """).fetchall()
         self.w = list(*self.w)[1]
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
         self.m = 0
@@ -597,7 +597,7 @@ class focuss(QWidget):
         self.bt.show()
         self.b2.show()
 
-        self.bt.setText("сильный меч(100)")
+        self.bt.setText("сильный меч(100)(3 урон)")
         self.b2.setText("уйти(0)")
         self.b.setText("это какой-то необычный торговец")
         self.bt.resize(200, 50)
@@ -614,7 +614,7 @@ class focuss(QWidget):
         self.b.setText('''<font color="green">куплено<Текст</font><br>''')
 
         self.w = self.w = cur.execute("""select * from shoap
-               where item == "сильный меч"  """).fetchall()
+               where item == "сильный меч(3)"  """).fetchall()
         self.w = list(*self.w)[1]
         self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
         self.b.setText('''<font color="red">куплено<Текст</font><br>''')
@@ -632,7 +632,7 @@ class focuss(QWidget):
         self.b.setText('''<font color="green">куплено<Текст</font><br>''')
         if self.m >= 100:
             self.w = self.w = cur.execute("""select * from shoap
-               where item == "сильный меч"  """).fetchall()
+               where item == "сильный меч(3)"  """).fetchall()
             self.w = list(*self.w)[1]
             self.weapon.setText(f'''<font color="red">оружие:{self.w} <Текст</font><br>''')
             self.b.setText('''<font color="green">куплено<Текст</font><br>''')
